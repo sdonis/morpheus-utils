@@ -206,14 +206,14 @@ kind: Service
 metadata:
   name: mlflow
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
   - port: 5000
     targetPort: 5000
-    nodePort: 31279
   selector:
     app: mlflow
 EOF
 
 echo "MLflow correctly installed in Kubernetes!"
-echo "open mlflow at http://node-ip:31279"
+echo "kubectl port-forward svc/mlflow -n <namespace> 5000:5000"
+echo "Access it at http://localhost:5000"
