@@ -20,4 +20,4 @@ fi
  
 # Iniciar Minikube como usuario normal
 echo "Starting Minikube..."
-minikube start --driver=docker
+minikube start --driver=none
