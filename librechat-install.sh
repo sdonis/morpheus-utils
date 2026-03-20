@@ -112,7 +112,7 @@ helm upgrade --install "$RELEASE_NAME" \
   --values /tmp/librechat-values.yaml
 
 echo ""
-echo "✅ LibreChat installed in https://${DOMAIN}"
+echo "✅ LibreChat installed. Expose librechat-librechat svc to NodePort and access it"
 echo ""
 
 # VERIFY INSTALLATION
