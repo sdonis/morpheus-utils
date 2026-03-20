@@ -199,7 +199,7 @@ spec:
             value: "postgresql://mlflow:mlflow123@postgres:5432/mlflowdb"
         command: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", \
                  "--backend-store-uri", "\$(MLFLOW_BACKEND_STORE_URI)", \
-                 "--default-artifact-root", "s3://mlflow-artifacts"]
+                 "--default-artifact-root", "s3://mlflow-artifacts", "--cors-allowed-origins", "*" ]
 ---
 apiVersion: v1
 kind: Service
@@ -217,3 +217,4 @@ EOF
 echo "MLflow correctly installed in Kubernetes!"
 echo "kubectl port-forward svc/mlflow -n <namespace> 5000:5000"
 echo "Access it at http://localhost:5000"
+echo "Or expose it via NodePort"
