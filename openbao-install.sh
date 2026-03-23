@@ -1,6 +1,7 @@
 #!/bin/bash
 
 NAMESPACE='<%= customOptions.namespace %>'
+NODEPORT='<%= customOptions.nodePort %>'
 POD="openbao-0"
 KEYS_PATH="/keys"
 
@@ -84,9 +85,12 @@ do
 done
 
 echo "🎉 OpenBao unsealed!"
-echo "Export openbao svc to NodePort and port-forward"
-echo "Use the token in /keys/root-token.txt to login and start using OpenBao using the following command"
-echo "kubectl exec -n $NAMESPACE $POD -- cat /keys/root-token.txt"
 
-# Opcional: login automático
-#kubectl exec -n $NAMESPACE $POD -- bao login $ROOT_TOKEN
+echo "Exposing openbao svc to NodePort at port $NODEPORT"
+kubectl patch svc openbao -n openbao --type='json' -p='[
+  {"op": "replace", "path": "/spec/type", "value": "NodePort"},
+  {"op": "replace", "path": "/spec/ports/0/nodePort", "value": $NODEPORT}
+]'
+
+echo "Use the token in /keys/root-token.txt to login and start using OpenBao with the following command"
+echo "kubectl exec -n $NAMESPACE $POD -- cat /keys/root-token.txt"
