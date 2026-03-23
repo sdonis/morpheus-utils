@@ -8,6 +8,7 @@ ALLOW_REGISTRATION="true"
 OPENAI_API_KEY="dummy"
 VLLM_BASE_URL="http://vllmruntime-sample.vllm.svc.cluster.local:80/v1"
 VLLM_MODEL='<%= customOptions.vllmModel %>'
+NODEPORT='<%= customOptions.nodePort %>'
 
 # CREDENTIALS
 CREDS_KEY=$(openssl rand -hex 32)
@@ -111,8 +112,13 @@ helm upgrade --install "$RELEASE_NAME" \
   --timeout 10m \
   --values /tmp/librechat-values.yaml
 
+kubectl patch svc librechat-librechat -n $NAMESPACE --type='json' -p="[
+  {\"op\": \"replace\", \"path\": \"/spec/type\", \"value\": \"NodePort\"},
+  {\"op\": \"replace\", \"path\": \"/spec/ports/0/nodePort\", \"value\": $NODEPORT}
+]"
+
 echo ""
-echo "✅ LibreChat installed. Expose librechat-librechat svc to NodePort and access it"
+echo "✅ LibreChat installed. Available at http://<node-ip>:$NODEPORT"
 echo ""
 
 # VERIFY INSTALLATION
