@@ -1,5 +1,7 @@
 NAMESPACE='<%= customOptions.namespace %>'
 IMAGE_TAG='<%= customOptions.imageTag %>'
+NODEPORT='<%= customOptions.NodePort %>'
+
 MLFLOW_IMAGE="ghcr.io/mlflow/mlflow:${IMAGE_TAG}"
 
 echo "Creating namespace $NAMESPACE..."
@@ -206,10 +208,11 @@ kind: Service
 metadata:
   name: mlflow
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
   - port: 5000
     targetPort: 5000
+    nodePort: $NODEPORT
   selector:
     app: mlflow
 EOF
