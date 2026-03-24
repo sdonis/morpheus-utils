@@ -1,15 +1,15 @@
 
 # CONFIG
 NAMESPACE='<%= customOptions.namespace %>'
-VLLM_RUNTIME='<%= customOptions.vllmRuntimeName %>'
-VLLM_MODEL='<%= customOptions.vllmModel %>'
 RELEASE_NAME="librechat"
 DOMAIN="librechat.ejemplo.com"
 INGRESS_CLASS="nginx"
 ALLOW_REGISTRATION="true"
 OPENAI_API_KEY="dummy"
+VLLM_MODEL='<%= customOptions.modelUrl %>'
+VLLM_MODEL_NAME='<%= customOptions.modelName %>'
+VLLM_RUNTIME="vllmruntime-sample-$VLLM_MODEL_NAME"
 VLLM_BASE_URL="http://$VLLM_RUNTIME.vllm.svc.cluster.local:80/v1"
-VLLM_MODEL='<%= customOptions.vllmModel %>'
 NODEPORT='<%= customOptions.nodePort %>'
 
 # CREDENTIALS
@@ -68,7 +68,7 @@ librechat:
     cache: true
     endpoints:
       custom:
-        - name: "$VLLM_MODEL"
+        - name: "$VLLM_MODEL_NAME"
           apiKey: "empty"
           baseURL: "${VLLM_BASE_URL}"
           models:
