@@ -1,12 +1,13 @@
 
 # CONFIG
 NAMESPACE='<%= customOptions.namespace %>'
+VLLM_RUNTIME='<%= customOptions.vllmRuntimeName %>'
 RELEASE_NAME="librechat"
 DOMAIN="librechat.ejemplo.com"
 INGRESS_CLASS="nginx"
 ALLOW_REGISTRATION="true"
 OPENAI_API_KEY="dummy"
-VLLM_BASE_URL="http://vllmruntime-sample.vllm.svc.cluster.local:80/v1"
+VLLM_BASE_URL="http://$VLLM_RUNTIME.vllm.svc.cluster.local:80/v1"
 VLLM_MODEL='<%= customOptions.vllmModel %>'
 NODEPORT='<%= customOptions.nodePort %>'
 
