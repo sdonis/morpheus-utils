@@ -53,7 +53,14 @@ stringData:
   OPENAI_API_KEY: "${OPENAI_API_KEY}"
 EOF
 
-cat > /tmp/librechat-values.yaml <<EOF
+# 4. Install with Helm
+helm upgrade --install "$RELEASE_NAME" \
+  oci://ghcr.io/danny-avila/librechat-chart/librechat \
+  --version 2.0.1 \
+  --namespace "$NAMESPACE" \
+  --wait \
+  --timeout 10m \
+  -f - <<EOF
 librechat:
   existingSecretName: "librechat-credentials-env"
 
@@ -68,7 +75,7 @@ librechat:
     cache: true
     endpoints:
       custom:
-        - name: "$VLLM_MODEL_NAME"
+        - name: "${VLLM_MODEL_NAME}"
           apiKey: "empty"
           baseURL: "${VLLM_BASE_URL}"
           models:
@@ -105,14 +112,6 @@ mongodb:
     runAsNonRoot: true
 EOF
 
-# 4. Install with Helm
-helm upgrade --install "$RELEASE_NAME" \
-  oci://ghcr.io/danny-avila/librechat-chart/librechat \
-  --version 2.0.1 \
-  --namespace "$NAMESPACE" \
-  --wait \
-  --timeout 10m \
-  --values /tmp/librechat-values.yaml
 
 kubectl patch svc librechat-librechat -n $NAMESPACE --type='json' -p="[
   {\"op\": \"replace\", \"path\": \"/spec/type\", \"value\": \"NodePort\"},
