@@ -2,6 +2,7 @@
 # CONFIG
 NAMESPACE='<%= customOptions.namespace %>'
 VLLM_RUNTIME='<%= customOptions.vllmRuntimeName %>'
+VLLM_MODEL='<%= customOptions.vllmModel %>'
 RELEASE_NAME="librechat"
 DOMAIN="librechat.ejemplo.com"
 INGRESS_CLASS="nginx"
@@ -67,7 +68,7 @@ librechat:
     cache: true
     endpoints:
       custom:
-        - name: "Llama 3.1 8B"
+        - name: "$VLLM_MODEL"
           apiKey: "empty"
           baseURL: "${VLLM_BASE_URL}"
           models:
