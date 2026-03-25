@@ -67,7 +67,7 @@ evidently:
   service:
     type: NodePort
     port: 8000
-    nodePort: 30800   # 30000-32767; set to "" to let Kubernetes auto-assign
+    nodePort: "<%=customOptions.nodePort%>"  
 
   persistence:
     workspace:
