@@ -1,27 +1,107 @@
-replicaCount: 1
+# ── Resource Names ──────────────────────────────────────────────────────────
+# Override these to customise the names of every Kubernetes object in the chart.
+names:
+  postgres: evidentlyai-postgres
+  evidently: evidentlyai-evidently
+  secret: evidentlyai-secret
+  configmap: evidentlyai-config
 
-image:
-  repository: paulaserna/evidently
-  tag: "0.1"
-  pullPolicy: IfNotPresent
+# ── PostgreSQL ────────────────────────────────────────────────────────────────
+postgres:
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
 
-nameOverride: ""
-fullnameOverride: "evidently"
+  auth:
+    database: evidently
+    username: evidently_user
+    # Plain-text value; stored in a Secret. Override with a strong password.
+    password: evidently_password
 
-namespace: evidently
+  service:
+    type: ClusterIP
+    port: 5432
 
-containerPort: 8000
+  persistence:
+    enabled: true
+    storageClass: ""       # leave empty to use cluster default
+    accessMode: ReadWriteOnce
+    size: 5Gi
 
-service:
-  type: NodePort
+  resources: {}
+  #   requests:
+  #     cpu: 250m
+  #     memory: 256Mi
+  #   limits:
+  #     cpu: 500m
+  #     memory: 512Mi
+
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 5
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 5
+
+# ── Evidently Service ─────────────────────────────────────────────────────────
+evidently:
+  image:
+    repository: evidently/evidently-service
+    tag: "0.7.21"
+    pullPolicy: Always
+
+  replicaCount: 1
+
   port: 8000
-  targetPort: 8000
-  NodePort: '<%= customOptions.nodePort %>'
 
-resources: {}
-  # limits:
-  #   cpu: 500m
-  #   memory: 512Mi
-  # requests:
-  #   cpu: 250m
-  #   memory: 256Mi
+  debug: "1"
+
+  # Path used by the dataset_storage fsspec backend inside the container.
+  # Must match the mountPath of the workspace volume in the deployment.
+  workspacePath: /app/workspace
+
+  service:
+    type: NodePort
+    port: 8000
+    nodePort: 30800   # 30000-32767; set to "" to let Kubernetes auto-assign
+
+  persistence:
+    workspace:
+      enabled: true
+      storageClass: ""
+      accessMode: ReadWriteOnce
+      size: 2Gi
+
+  resources: {}
+  #   requests:
+  #     cpu: 250m
+  #     memory: 512Mi
+  #   limits:
+  #     cpu: 1
+  #     memory: 1Gi
+
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    failureThreshold: 5
+
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 5
+
+# ── Ingress (optional) ────────────────────────────────────────────────────────
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: evidently.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

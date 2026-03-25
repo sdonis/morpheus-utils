@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.names.configmap }}
+  labels:
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  postgres_config.yaml: |
+    storage:
+      type: sql
+
+    database:
+      url: postgresql://{{ .Values.postgres.auth.username }}:{{ .Values.postgres.auth.password }}@{{ .Values.names.postgres }}:{{ .Values.postgres.service.port }}/{{ .Values.postgres.auth.database }}
+
+    dataset_storage:
+      type: fsspec
+      path: {{ .Values.evidently.workspacePath }}

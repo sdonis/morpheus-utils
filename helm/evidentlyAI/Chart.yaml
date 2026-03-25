@@ -1,5 +1,12 @@
 apiVersion: v2
 name: evidentlyai
-description: Helm chart for vLLM production stack
+description: A Helm chart for deploying EvidentlyAI service with PostgreSQL backend
+type: application
 version: 0.1.0
-appVersion: "1.0"
+appVersion: "latest"
+keywords:
+  - evidentlyai
+  - ml-monitoring
+  - data-drift
+maintainers:
+  - name: evidentlyai

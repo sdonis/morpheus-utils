@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.names.evidently }}
+  labels:
+    helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: evidently
+spec:
+  replicas: {{ .Values.evidently.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: evidently
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: evidently
+    spec:
+      initContainers:
+        # Wait for Postgres to be ready before starting the Evidently service
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ .Values.names.postgres }} {{ .Values.postgres.service.port }}; do
+                echo "Waiting for Postgres...";
+                sleep 3;
+              done
+      containers:
+        - name: evidently
+          image: "{{ .Values.evidently.image.repository }}:{{ .Values.evidently.image.tag }}"
+          imagePullPolicy: {{ .Values.evidently.image.pullPolicy }}
+          args:
+            - "--port"
+            - "{{ .Values.evidently.port }}"
+            - "--conf-path"
+            - "/app/config.yaml"
+          ports:
+            - name: http
+              containerPort: {{ .Values.evidently.port }}
+              protocol: TCP
+          env:
+            - name: EVIDENTLY_DEBUG
+              value: {{ .Values.evidently.debug | quote }}
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: {{ .Values.evidently.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.evidently.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.evidently.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: {{ .Values.evidently.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.evidently.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.evidently.readinessProbe.failureThreshold }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: postgres_config.yaml
+              readOnly: true
+            - name: workspace
+              mountPath: /app/workspace
+          {{- with .Values.evidently.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.names.configmap }}
+        - name: workspace
+          {{- if .Values.evidently.persistence.workspace.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.names.evidently }}-workspace
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
