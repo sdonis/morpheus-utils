@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: paulaserna/evidently
+  tag: "0.1"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: "evidently"
+
+namespace: evidently
+
+containerPort: 8000
+
+service:
+  type: NodePort
+  port: 8000
+  targetPort: 8000
+  NodePort: '<%= customOptions.nodePort %>'
+
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+  #   memory: 256Mi

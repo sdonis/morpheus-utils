@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fullnameOverride }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.fullnameOverride }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fullnameOverride }}
+    spec:
+      containers:
+      - name: {{ .Values.fullnameOverride }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
