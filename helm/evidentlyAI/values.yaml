@@ -67,7 +67,7 @@ evidently:
   service:
     type: NodePort
     port: 8000
-    nodePort: "<%=customOptions.nodePort%>"  
+    nodePort: 30800 
 
   persistence:
     workspace:
